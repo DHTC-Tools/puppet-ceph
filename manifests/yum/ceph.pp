@@ -7,6 +7,7 @@ class ceph::yum::ceph (
     gpgkey   => "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc",
     gpgcheck=> 1,
     enabled => 1,
+    priority => 5,
     before   => Package['ceph'],
   }
 }
