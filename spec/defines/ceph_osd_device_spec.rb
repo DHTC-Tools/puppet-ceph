@@ -107,6 +107,7 @@ class { 'ceph::osd':
 
       it { should contain_exec('ceph-osd-register-56').with(
         'command' => "ceph auth add osd.56 osd 'allow *' mon 'allow rwx' -i /var/lib/ceph/osd/osd.56/keyring",
+        'unless'  => "ceph auth list | egrep '^osd.56$'",
         'path'    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
         'require' => 'Exec[ceph-osd-mkfs-56]'
       ) }
