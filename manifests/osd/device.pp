@@ -111,6 +111,7 @@ size=1024m -n size=64k ${name}1",
         command => "\
 ceph auth add osd.${osd_id} osd 'allow *' mon 'allow rwx' \
 -i ${osd_data}/keyring",
+        unless  => "ceph auth list | egrep '^osd.${osd_id}$'",
         path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
         require => Exec["ceph-osd-mkfs-${osd_id}"],
       }
