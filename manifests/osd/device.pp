@@ -119,7 +119,7 @@ ceph auth add osd.${osd_id} osd 'allow *' mon 'allow rwx' \
       $blocks_fact = "blocks_${devname}1"
       $blocks = inline_template('<%= scope.lookupvar(blocks_fact) or "undefined" %>')
       if $blocks != undefined {
-        $osd_weight = sprintf("%.2f", ($blocks/1073741824) )
+        $osd_weight = sprintf("%.2f", ($blocks/1073741824.0) )
       } else {
         $osd_weight = 1
       }
