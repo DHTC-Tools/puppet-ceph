@@ -73,7 +73,6 @@ class { 'ceph::osd':
           :concat_basedir      => '/var/lib/puppet/lib/concat',
           :blkid_uuid_device1  => 'dummy-uuid-1234',
           :ceph_osd_id_device1 => '56',
-          :ceph_osd_56_is_new  => 'true',
           :hostname            => 'dummy-host',
           :blocks_device1      => '1073741824'
         }
