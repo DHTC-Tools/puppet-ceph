@@ -129,7 +129,6 @@ ceph auth add osd.${osd_id} osd 'allow *' mon 'allow rwx' \
         exec { "ceph-osd-crush-${osd_id}":
           command => "\
 ceph osd crush set ${osd_id} ${osd_weight} root=default ${::ceph::conf::osd_crush_location} host=${::hostname}",
-          onlyif  => "ceph osd dump | egrep '^osd.{$osd_id}\s | grep new",
           path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
           require => Exec["ceph-osd-register-${osd_id}"],
         }
