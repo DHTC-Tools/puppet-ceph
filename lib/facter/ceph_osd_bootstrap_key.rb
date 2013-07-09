@@ -29,16 +29,6 @@ if ceph_osd_dump
     if line =~ /^osd\.(\d+).* ([a-f0-9\-]+)$/
       ceph_osds[$2] = $1
     end
-
-    # add a fact if the osd is new
-    if line =~ /^osd\.(\d+).*exists,new$/
-      osd_id = $1
-      Facter.add("ceph_osd_${osd_id}_is_new" do
-        setcode do
-          "true"
-        end
-      end
-    end
   end
 end
 
