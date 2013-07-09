@@ -116,19 +116,21 @@ ceph auth add osd.${osd_id} osd 'allow *' mon 'allow rwx' \
         require => Exec["ceph-osd-mkfs-${osd_id}"],
       }
 
-      $blocks_fact = "blocks_${devname}1"
-      $blocks = inline_template('<%= scope.lookupvar(blocks_fact) or "undefined" %>')
-      if $blocks != undefined {
-        $osd_weight = sprintf("%.2f", ($blocks/1073741824.0) )
-      } else {
-        $osd_weight = 1
-      }
-      exec { "ceph-osd-crush-${osd_id}":
-        command => "\
-ceph osd crush set ${osd_id} ${osd_weight} root=default ${::ceph::conf::osd_crush_location} host=${::hostname}",
-        path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
-        require => Exec["ceph-osd-register-${osd_id}"],
-      }
+#      Since cuttlefish, the init script of ceph puts the osd in crush itself.
+#
+#      $blocks_fact = "blocks_${devname}1"
+#      $blocks = inline_template('<%= scope.lookupvar(blocks_fact) or "undefined" %>')
+#      if $blocks != undefined {
+#        $osd_weight = sprintf("%.2f", ($blocks/1073741824.0) )
+#      } else {
+#        $osd_weight = 1
+#      }
+#      exec { "ceph-osd-crush-${osd_id}":
+#        command => "\
+#ceph osd crush set ${osd_id} ${osd_weight} root=default ${::ceph::conf::osd_crush_location} host=${::hostname}",
+#        path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
+#        require => Exec["ceph-osd-register-${osd_id}"],
+#      }
 
       service { "ceph-osd.${osd_id}":
         ensure    => running,
@@ -136,7 +138,7 @@ ceph osd crush set ${osd_id} ${osd_weight} root=default ${::ceph::conf::osd_crus
         start     => "service ceph start osd.${osd_id}",
         stop      => "service ceph stop osd.${osd_id}",
         status    => "service ceph status osd.${osd_id}",
-        require   => Exec["ceph-osd-crush-${osd_id}"],
+        require   => Exec["ceph-osd-register-${osd_id}"],
         subscribe => Concat['/etc/ceph/ceph.conf'],
       }
 
