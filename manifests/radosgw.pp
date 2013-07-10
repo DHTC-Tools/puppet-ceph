@@ -33,6 +33,8 @@ define ceph::radosgw (
   include 'ceph::conf'
   include 'ceph::params'
 
+  Package['ceph'] -> Ceph::Key <<| title == 'admin' |>>
+
   ensure_packages( [ 'ceph-radosgw' ] )
 
   ceph::conf::radosgw { $name: }
@@ -41,7 +43,7 @@ define ceph::radosgw (
     command =>"ceph auth get-or-create client.radosgw.${::hostname} osd 'allow rwx' mon 'allow r' --name mon. --key=${monitor_secret} -o /etc/ceph/ceph.client.radosgw.${::hostname}.keyring",
     path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
     creates => "/etc/ceph/ceph.client.radosgw.${::hostname}.keyring",
-    before  => Service["ceph-radosgw"],
+    before  => Service["radosgw"],
     require => Package['ceph'],
   }
 
