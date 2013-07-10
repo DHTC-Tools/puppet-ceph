@@ -26,7 +26,8 @@
 #
 
 define ceph::radosgw (
-  $monitor_secret
+  $monitor_secret,
+  $admin_email = 'root@localhost'
 ) {
 
   include 'ceph::package'
@@ -35,7 +36,7 @@ define ceph::radosgw (
 
   Package['ceph'] -> Ceph::Key <<| title == 'admin' |>>
 
-  ensure_packages( [ 'ceph-radosgw' ] )
+  ensure_packages( [ 'ceph-radosgw', 'httpd' ] )
 
   ceph::conf::radosgw { $name: }
 
@@ -59,4 +60,27 @@ define ceph::radosgw (
     hasstatus => false,
     require   => [Exec['ceph-radosgw-keyring'], File['/etc/init.d/radosgw']],
   }
+
+  package { 'mod_fastcgi':
+    ensure   => 'present',
+    provider => 'rpm',
+    source   => 'http://pkgs.repoforge.org/mod_fastcgi/mod_fastcgi-2.4.6-2.el6.rf.x86_64.rpm',
+    require  => Package['httpd']
+  }    
+
+  file { '/etc/httpd/conf.d/rgw.conf':
+    content => template('ceph/rgw.conf.erb'),
+    notify  => Service['httpd']
+  }
+  
+  file { '/var/www/s3gw.fcgi':
+    content => template('ceph/s3gw.fcgi.erb'),
+    notify  => Service['httpd']
+  }
+
+  service { 'httpd':
+    ensure   => 'running',
+    require  => [File['/etc/httpd/conf.d/rgw.conf'], File['/var/www/s3gw.fcgi'], Package['mod_fastcgi']]
+  }
+
 }

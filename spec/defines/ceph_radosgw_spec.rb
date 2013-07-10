@@ -13,7 +13,10 @@ class { "ceph::conf": fsid => "1234567890" }
   end
 
   let :default_params do
-    { :monitor_secret => 'hardtoguess' }
+    {
+      :monitor_secret => 'hardtoguess',
+      :admin_email    => 'me@somewhere.tld'
+    }
   end
 
   let :params do
@@ -29,6 +32,7 @@ class { "ceph::conf": fsid => "1234567890" }
 
   it { should include_class('ceph::package') }
   it { should include_class('ceph::conf') }
+  it { should include_class('ceph::params') }
 
   describe 'with default parameters' do
     it { should contain_ceph__conf__radosgw('radosgw1') }
