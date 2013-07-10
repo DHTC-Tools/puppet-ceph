@@ -41,9 +41,15 @@ class { "ceph::conf": fsid => "1234567890" }
       'require' => 'Package[ceph]'
     )}
 
-    it { should contain_service('ceph-radosgw').with(
-      'ensure'  => 'running',
-      'require' => 'Exec[ceph-radosgw-keyring]'
+    it { should contain_file('/etc/init.d/radosgw').with(
+      'ensure' => 'link',
+      'source' => '/etc/init.d/ceph-radosgw'
+    )}
+
+    it { should contain_service('radosgw').with(
+      'ensure'    => 'running',
+      'hasstatus' => 'false',
+      'require'   => ['Exec[ceph-radosgw-keyring]', 'File[/etc/init.d/radosgw]']
     )}
 
   end

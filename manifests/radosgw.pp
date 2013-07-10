@@ -45,9 +45,16 @@ define ceph::radosgw (
     require => Package['ceph'],
   }
 
-  service { "ceph-radosgw":
-    ensure   => running,
-    provider => $::ceph::params::service_provider,
-    require  => Exec['ceph-radosgw-keyring'],
+  file { '/etc/init.d/radosgw':
+    ensure  => link,
+    source  => '/etc/init.d/ceph-radosgw',
+    require => Package['ceph'],
+  }
+
+  service { "radosgw":
+    ensure    => running,
+    provider  => $::ceph::params::service_provider,
+    hasstatus => false,
+    require   => [Exec['ceph-radosgw-keyring'], File['/etc/init.d/radosgw']],
   }
 }
