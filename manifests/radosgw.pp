@@ -80,6 +80,7 @@ define ceph::radosgw (
   
   file { '/var/www/s3gw.fcgi':
     content => template('ceph/s3gw.fcgi.erb'),
+    mode    => '0755',
     require => Package['httpd'],
     notify  => Service['httpd']
   }
