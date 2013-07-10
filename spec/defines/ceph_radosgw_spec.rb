@@ -37,7 +37,7 @@ class { "ceph::conf": fsid => "1234567890" }
       'command' => "ceph auth get-or-create client.radosgw.some-host.foo.tld osd 'allow rwx' mon 'allow r' --name mon. --key=hardtoguess -o /etc/ceph/ceph.client.radosgw.some-host.foo.tld.keyring",
       'path'    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
       'creates' => '/etc/ceph/ceph.client.radosgw.some-host.foo.tld.keyring',
-      'before'  => 'Service[ceph-radosgw]',
+      'before'  => 'Service[radosgw]',
       'require' => 'Package[ceph]'
     )}
 
