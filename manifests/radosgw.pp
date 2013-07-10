@@ -1,16 +1,13 @@
 # Configure a ceph radosgw
 #
 # == Name
-#   This resource's name is the mon's id and must be numeric.
+#   This resource's name is generally the hostname
 # == Parameters
-# [*fsid*] The cluster's fsid.
-#   Mandatory. Get one with `uuidgen -r`.
+# [*monitor_secret*] See mon.pp
+#   Mandatory.
 #
-# [*auth_type*] Auth type.
-#   Optional. undef or 'cephx'. Defaults to 'cephx'.
-#
-# [*mds_data*] Base path for mon data. Data will be put in a mon.$id folder.
-#   Optional. Defaults to '/var/lib/ceph/mds.
+# [*admin_email*] Email address for apache server admin
+#   Optional. Defaults to root@localhost
 #
 # == Dependencies
 #
@@ -68,19 +65,29 @@ define ceph::radosgw (
     require  => Package['httpd']
   }    
 
+  augeas{ 'turn_fastcgiwrapper_off':
+    context => '/files/etc/httpd/conf.d/fastcgi.conf',
+    changes => "set *[self::directive='FastCgiWrapper']/arg Off",
+    require => Package['mod_fastcgi'],
+    notify  => Service['httpd']
+  }
+
   file { '/etc/httpd/conf.d/rgw.conf':
     content => template('ceph/rgw.conf.erb'),
+    require => Package['httpd'],
     notify  => Service['httpd']
   }
   
   file { '/var/www/s3gw.fcgi':
     content => template('ceph/s3gw.fcgi.erb'),
+    require => Package['httpd'],
     notify  => Service['httpd']
   }
 
   service { 'httpd':
     ensure   => 'running',
-    require  => [File['/etc/httpd/conf.d/rgw.conf'], File['/var/www/s3gw.fcgi'], Package['mod_fastcgi']]
+    require  => [File['/etc/httpd/conf.d/rgw.conf'], File['/var/www/s3gw.fcgi'],
+      Package['mod_fastcgi'], Augeas['turn_fastcgiwrapper_off']]
   }
 
 }
