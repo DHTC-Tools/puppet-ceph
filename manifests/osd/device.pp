@@ -27,12 +27,14 @@ define ceph::osd::device (
 
   exec { "mktable_gpt_${devname}":
     command => "parted -a optimal --script ${name} mktable gpt",
+    path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
     unless  => "parted --script ${name} print|grep -sq 'Partition Table: gpt'",
     require => Package['parted']
   }
 
   exec { "mkpart_${devname}":
     command => "parted -a optimal -s ${name} mkpart ceph 0% 100%",
+    path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
     unless  => "parted ${name} print | egrep '^ 1.*ceph$'",
     require => [Package['parted'], Exec["mktable_gpt_${devname}"]]
   }
@@ -40,6 +42,7 @@ define ceph::osd::device (
   exec { "mkfs_${devname}":
     command => "mkfs.xfs -f -d agcount=${::processorcount} -l \
 size=1024m -n size=64k ${name}1",
+    path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
     unless  => "xfs_admin -l ${name}1",
     require => [Package['xfsprogs'], Exec["mkpart_${devname}"]],
   }
@@ -50,6 +53,7 @@ size=1024m -n size=64k ${name}1",
   if $blkid != 'undefined'  and defined( Ceph::Key['admin'] ){
     exec { "ceph_osd_create_${devname}":
       command => "ceph osd create ${blkid}",
+      path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
       unless  => "ceph osd dump | grep -sq ${blkid}",
       require => Ceph::Key['admin'],
     }
@@ -91,6 +95,7 @@ size=1024m -n size=64k ${name}1",
 --mkkey \
 --osd-uuid ${blkid}
 ",
+        path    => '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
         creates => "${osd_data}/keyring",
         require => [
           Mount[$osd_data],
