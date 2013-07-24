@@ -29,21 +29,24 @@ class { 'ceph::osd':
     it { should include_class('ceph::conf') }
 
     it { should contain_exec('mktable_gpt_device').with(
-      'command' => 'parted -a optimal --script /dev/device mktable gpt',
-      'unless'  => "parted --script /dev/device print|grep -sq 'Partition Table: gpt'",
-      'require' => 'Package[parted]'
+      'command'   => 'parted -a optimal --script /dev/device mktable gpt',
+      'unless'    => "parted --script /dev/device print|grep -sq 'Partition Table: gpt'",
+      'logoutput' => 'true',
+      'require'   => 'Package[parted]'
     ) }
 
     it { should contain_exec('mkpart_device').with(
-      'command' => 'parted -a optimal -s /dev/device mkpart ceph 0% 100%',
-      'unless'  => "parted /dev/device print | egrep '^ 1.*ceph$'",
-      'require' => ['Package[parted]', 'Exec[mktable_gpt_device]']
+      'command'   => 'parted -a optimal -s /dev/device mkpart ceph 0% 100%',
+      'unless'    => "parted /dev/device print | egrep '^ 1.*ceph$'",
+      'logoutput' => 'true',
+      'require'   => ['Package[parted]', 'Exec[mktable_gpt_device]']
     ) }
 
     it { should contain_exec('mkfs_device').with(
-      'command' => 'mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device1',
-      'unless'  => 'xfs_admin -l /dev/device1',
-      'require' => ['Package[xfsprogs]', 'Exec[mkpart_device]']
+      'command'   => 'mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device1',
+      'unless'    => 'xfs_admin -l /dev/device1',
+      'logoutput' => 'true',
+      'require'   => ['Package[xfsprogs]', 'Exec[mkpart_device]']
     ) }
 
   end
