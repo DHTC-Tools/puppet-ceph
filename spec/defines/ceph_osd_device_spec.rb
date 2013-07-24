@@ -98,8 +98,8 @@ ceph::key { 'admin':
         'ensure'  => 'mounted',
         'device'  => '/dev/device1',
         'fstype'  => 'xfs',
-        'options' => 'rw,noatime,inode64',
-        'pass'    => 2,
+        'options' => 'rw,noatime,inode64,noauto',
+        'pass'    => 0,
         'require' => ['Exec[mkfs_device]', 'File[/var/lib/ceph/osd/osd.56]']
       ) }
 
@@ -220,8 +220,8 @@ ceph::key { 'admin':
         'ensure'  => 'mounted',
         'device'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
         'fstype'  => 'xfs',
-        'options' => 'rw,noatime,inode64',
-        'pass'    => 2,
+        'options' => 'rw,noatime,inode64,noauto',
+        'pass'    => 0,
         'require' => ['Exec[mkfs_pci-0000:02:00.0-sas-0x500015554964d213-lun-0]', 'File[/var/lib/ceph/osd/osd.56]']
       ) }
 
