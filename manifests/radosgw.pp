@@ -53,6 +53,7 @@ define ceph::radosgw (
 
   service { "radosgw":
     ensure    => running,
+    enable    => true,
     provider  => $::ceph::params::service_provider,
     hasstatus => false,
     require   => [Exec['ceph-radosgw-keyring'], File['/etc/init.d/radosgw']],
@@ -86,8 +87,9 @@ define ceph::radosgw (
   }
 
   service { 'httpd':
-    ensure   => 'running',
-    require  => [File['/etc/httpd/conf.d/rgw.conf'], File['/var/www/s3gw.fcgi'],
+    ensure  => running,
+    enable  => true,
+    require => [File['/etc/httpd/conf.d/rgw.conf'], File['/var/www/s3gw.fcgi'],
       Package['mod_fastcgi'], Augeas['turn_fastcgiwrapper_off']]
   }
 
