@@ -240,18 +240,8 @@ ceph::key { 'admin':
         'require' => 'Exec[ceph-osd-mkfs-56]'
       ) }
 
-      it { should contain_service('ceph-osd.56').with(
-        'ensure'    => 'running',
-        'start'     => 'service ceph start osd.56',
-        'stop'      => 'service ceph stop osd.56',
-        'status'    => 'service ceph status osd.56',
-        'require'   => 'Exec[ceph-osd-register-56]',
-        'subscribe' => 'Concat[/etc/ceph/ceph.conf]'
-      ) }
     end
 
   end
-
-
 
 end
