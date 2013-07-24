@@ -24,6 +24,13 @@ define ceph::osd::device (
   include ceph::params
 
   $devname = regsubst($name, '.*/', '')
+  if $name =~ /by-path/ {
+     $partfact = "disk/by-path/${devname}-part1"
+     $partname = "${name}-part1"
+  } else {
+     $partfact = "${devname}1"
+     $partname = "${name}1"
+  }
 
   exec { "mktable_gpt_${devname}":
     command => "parted -a optimal --script ${name} mktable gpt",
@@ -39,12 +46,12 @@ define ceph::osd::device (
 
   exec { "mkfs_${devname}":
     command => "mkfs.xfs -f -d agcount=${::processorcount} -l \
-size=1024m -n size=64k ${name}1",
-    unless  => "xfs_admin -l ${name}1",
+size=1024m -n size=64k ${partname}",
+    unless  => "xfs_admin -l ${partname}",
     require => [Package['xfsprogs'], Exec["mkpart_${devname}"]],
   }
 
-  $blkid_uuid_fact = "blkid_uuid_${devname}1"
+  $blkid_uuid_fact = "blkid_uuid_${partfact}"
   $blkid = inline_template('<%= scope.lookupvar(blkid_uuid_fact) or "undefined" %>')
 
   if $blkid != 'undefined'  and defined( Ceph::Key['admin'] ){
@@ -54,13 +61,13 @@ size=1024m -n size=64k ${name}1",
       require => Ceph::Key['admin'],
     }
 
-    $osd_id_fact = "ceph_osd_id_${devname}1"
+    $osd_id_fact = "ceph_osd_id_${partfact}"
     $osd_id = inline_template('<%= scope.lookupvar(osd_id_fact) or "undefined" %>')
 
     if $osd_id != 'undefined' {
 
       ceph::conf::osd { $osd_id:
-        device       => $name,
+        device       => $partname,
         cluster_addr => $::ceph::osd::cluster_address,
         public_addr  => $::ceph::osd::public_address,
       }
@@ -73,7 +80,7 @@ size=1024m -n size=64k ${name}1",
 
       mount { $osd_data:
         ensure  => mounted,
-        device  => "${name}1",
+        device  => "${partname}",
         atboot  => true,
         fstype  => 'xfs',
         options => 'rw,noatime,inode64',
