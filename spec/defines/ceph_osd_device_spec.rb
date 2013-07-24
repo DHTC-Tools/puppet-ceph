@@ -97,7 +97,6 @@ ceph::key { 'admin':
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
         'ensure'  => 'mounted',
         'device'  => '/dev/device1',
-        'atboot'  => true,
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64',
         'pass'    => 2,
@@ -220,7 +219,6 @@ ceph::key { 'admin':
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
         'ensure'  => 'mounted',
         'device'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
-        'atboot'  => true,
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64',
         'pass'    => 2,

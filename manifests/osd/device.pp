@@ -81,7 +81,6 @@ size=1024m -n size=64k ${partname}",
       mount { $osd_data:
         ensure  => mounted,
         device  => "${partname}",
-        atboot  => true,
         fstype  => 'xfs',
         options => 'rw,noatime,inode64',
         pass    => 2,
