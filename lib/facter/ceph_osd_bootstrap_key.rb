@@ -26,6 +26,9 @@ end
 
 # Load the osds/uuids from ceph
 
+# run blkid once on the by-path entries to ensure blkid.tab is correct
+Facter::Util::Resolution.exec("blkid /dev/disk/by-path/*")
+
 begin
   Timeout::timeout(timeout) {
     ceph_osds = Hash.new
