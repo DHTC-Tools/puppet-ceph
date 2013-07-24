@@ -82,8 +82,8 @@ size=1024m -n size=64k ${partname}",
         ensure  => mounted,
         device  => "${partname}",
         fstype  => 'xfs',
-        options => 'rw,noatime,inode64',
-        pass    => 2,
+        options => 'rw,noatime,inode64,noauto',
+        pass    => 0,
         require => [
           Exec["mkfs_${devname}"],
           File[$osd_data]
