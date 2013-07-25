@@ -82,7 +82,7 @@ size=1024m -n size=64k ${partname}",
       }
 
       mount { $osd_data:
-        ensure  => mounted,
+        ensure  => present,
         device  => "${partname}",
         fstype  => 'xfs',
         options => 'rw,noatime,inode64,noauto',
@@ -94,7 +94,7 @@ size=1024m -n size=64k ${partname}",
       }
 
       exec { "ceph-osd-mkfs-${osd_id}":
-        command => "ceph-osd -c /etc/ceph/ceph.conf \
+        command => "mount ${osd_data} && ceph-osd -c /etc/ceph/ceph.conf \
 -i ${osd_id} \
 --mkfs \
 --mkkey \

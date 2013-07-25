@@ -98,7 +98,7 @@ ceph::key { 'admin':
       ) }
 
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
-        'ensure'  => 'mounted',
+        'ensure'  => 'present',
         'device'  => '/dev/device1',
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64,noauto',
@@ -107,7 +107,7 @@ ceph::key { 'admin':
       ) }
 
       it { should contain_exec('ceph-osd-mkfs-56').with(
-        'command' => 'ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
+        'command' => 'mount /var/lib/ceph/osd/osd.56 && ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
 ',
         'creates' => '/var/lib/ceph/osd/osd.56/keyring',
         'require' => ['Mount[/var/lib/ceph/osd/osd.56]', 'Concat[/etc/ceph/ceph.conf]']
@@ -220,7 +220,7 @@ ceph::key { 'admin':
       ) }
 
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
-        'ensure'  => 'mounted',
+        'ensure'  => 'present',
         'device'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64,noauto',
@@ -229,7 +229,7 @@ ceph::key { 'admin':
       ) }
 
       it { should contain_exec('ceph-osd-mkfs-56').with(
-        'command' => 'ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
+        'command' => 'mount /var/lib/ceph/osd/osd.56 && ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
 ',
         'creates' => '/var/lib/ceph/osd/osd.56/keyring',
         'require' => ['Mount[/var/lib/ceph/osd/osd.56]', 'Concat[/etc/ceph/ceph.conf]']
