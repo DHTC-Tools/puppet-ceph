@@ -47,7 +47,7 @@ define ceph::osd::device (
   }
 
   exec { "mkfs_${devname}":
-    command   => "sleep 120 && mkfs.xfs -f -d agcount=${::processorcount} -l \
+    command   => "sleep 5 && mkfs.xfs -f -d agcount=${::processorcount} -l \
 size=1024m -n size=64k ${partname}",
     unless    => "xfs_admin -l ${partname}",
     logoutput => true,
