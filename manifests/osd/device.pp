@@ -101,6 +101,7 @@ size=1024m -n size=64k ${partname}",
 --osd-uuid ${blkid}
 ",
         creates => "${osd_data}/keyring",
+        unless  => "ceph auth list | egrep '^osd.${osd_id}$'",
         require => [
           Mount[$osd_data],
           Concat['/etc/ceph/ceph.conf'],

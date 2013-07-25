@@ -109,6 +109,7 @@ ceph::key { 'admin':
       it { should contain_exec('ceph-osd-mkfs-56').with(
         'command' => 'mount /var/lib/ceph/osd/osd.56 && ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
 ',
+        'unless'  => "ceph auth list | egrep '^osd.56$'",
         'creates' => '/var/lib/ceph/osd/osd.56/keyring',
         'require' => ['Mount[/var/lib/ceph/osd/osd.56]', 'Concat[/etc/ceph/ceph.conf]']
       ) }
@@ -231,6 +232,7 @@ ceph::key { 'admin':
       it { should contain_exec('ceph-osd-mkfs-56').with(
         'command' => 'mount /var/lib/ceph/osd/osd.56 && ceph-osd -c /etc/ceph/ceph.conf -i 56 --mkfs --mkkey --osd-uuid dummy-uuid-1234
 ',
+        'unless'  => "ceph auth list | egrep '^osd.56$'",
         'creates' => '/var/lib/ceph/osd/osd.56/keyring',
         'require' => ['Mount[/var/lib/ceph/osd/osd.56]', 'Concat[/etc/ceph/ceph.conf]']
       ) }
