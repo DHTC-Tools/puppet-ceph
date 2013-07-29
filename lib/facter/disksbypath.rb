@@ -6,7 +6,7 @@
 
 require 'facter'
 
-if Facter.value(:kernel) == 'Linux'
+if Facter.value(:kernel) == 'Linux' and File.exists?('/dev/disk/by-path')
   disksbypath = []
 
   Facter::Util::Resolution.exec('ls /dev/disk/by-path/ 2> /dev/null').each_line do |line|
