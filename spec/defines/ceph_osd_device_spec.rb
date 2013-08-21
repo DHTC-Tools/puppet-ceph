@@ -74,7 +74,6 @@ ceph::key { 'admin':
     it { should contain_exec('ceph_osd_create_device').with(
       'command' => 'ceph osd create dummy-uuid-1234',
       'unless'  => 'ceph osd dump | grep -sq dummy-uuid-1234',
-      'require' => 'Ceph::Key[admin]'
     ) }
 
     describe 'when the osd is created' do
@@ -197,7 +196,6 @@ ceph::key { 'admin':
     it { should contain_exec('ceph_osd_create_pci-0000:02:00.0-sas-0x500015554964d213-lun-0').with(
       'command' => 'ceph osd create dummy-uuid-1234',
       'unless'  => 'ceph osd dump | grep -sq dummy-uuid-1234',
-      'require' => 'Ceph::Key[admin]'
     ) }
 
     describe 'when the osd is created' do
