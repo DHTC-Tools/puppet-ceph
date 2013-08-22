@@ -7,7 +7,7 @@ class ceph::conf::client (
   $rbd_cache_writethrough_until_flush = undef,
 ) {
 
-  concat::fragment { "ceph-client.conf":
+  concat::fragment { "ceph-client-${::hostname}.conf":
     target  => '/etc/ceph/ceph.conf',
     order   => '90',
     content => template('ceph/ceph.conf-client.erb'),

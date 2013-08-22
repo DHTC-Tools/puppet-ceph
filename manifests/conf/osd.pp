@@ -4,7 +4,7 @@ define ceph::conf::osd (
   $public_addr,
 ) {
 
-  concat::fragment { "ceph-osd-${name}.conf":
+  concat::fragment { "ceph-osd-${::hostname}.conf":
     target  => '/etc/ceph/ceph.conf',
     order   => '80',
     content => template('ceph/ceph.conf-osd.erb'),
