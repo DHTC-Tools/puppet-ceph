@@ -8,6 +8,7 @@ class ceph::conf::client (
 ) {
 
   concat::fragment { "ceph-client-${::hostname}.conf":
+    tag     => "${ceph::conf::fsid}-ceph.conf",
     target  => '/etc/ceph/ceph.conf',
     order   => '90',
     content => template('ceph/ceph.conf-client.erb'),
