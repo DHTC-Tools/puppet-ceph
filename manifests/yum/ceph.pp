@@ -1,7 +1,7 @@
 class ceph::yum::ceph (
   $release = 'cuttlefish'
 ) {
-  yumrepo { 'ceph':
+  yumrepo { "ceph-${release}":
     descr    => "Ceph ${release} repository",
     baseurl  => "http://ceph.com/rpm-${release}/el6/x86_64/",
     gpgkey   =>
