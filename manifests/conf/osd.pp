@@ -4,7 +4,7 @@ define ceph::conf::osd (
   $public_addr,
 ) {
 
-  concat::fragment { "ceph-osd-${::hostname}.conf":
+  concat::fragment { "ceph-osd-${::hostname}-${name}.conf":
     tag     => "${ceph::conf::fsid}-ceph.conf",
     target  => '/etc/ceph/ceph.conf',
     order   => '80',
