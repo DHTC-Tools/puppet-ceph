@@ -42,9 +42,10 @@ class ceph::conf (
     require => Package['ceph'],
   }
 
-  Concat::Fragment <<| target == '/etc/ceph/ceph.conf' |>>
+  Concat::Fragment <<| tag == "${fsid}-ceph.conf" |>>
 
   concat::fragment { 'ceph.conf':
+    tag     => "${fsid}-ceph.conf",
     target  => '/etc/ceph/ceph.conf',
     order   => '01',
     content => template('ceph/ceph.conf.erb'),

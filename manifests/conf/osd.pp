@@ -5,7 +5,8 @@ define ceph::conf::osd (
   $osd_journal,
 ) {
 
-  concat::fragment { "ceph-osd-${name}.conf":
+  concat::fragment { "ceph-osd-${::hostname}-${name}.conf":
+    tag     => "${ceph::conf::fsid}-ceph.conf",
     target  => '/etc/ceph/ceph.conf',
     order   => '80',
     content => template('ceph/ceph.conf-osd.erb'),
