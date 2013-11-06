@@ -17,6 +17,7 @@
 #
 
 define ceph::osd::device (
+  $journal_size_mb = 10240,
 ) {
 
   include ceph::osd
@@ -25,11 +26,13 @@ define ceph::osd::device (
 
   $devname = regsubst($name, '.*/', '')
   if $name =~ /by-path/ {
-     $partfact = "disk/by-path/${devname}-part1"
-     $partname = "${name}-part1"
+    $journalname = "${name}-part1"
+    $partfact = "disk/by-path/${devname}-part2"
+    $partname = "${name}-part2"
   } else {
-     $partfact = "${devname}1"
-     $partname = "${name}1"
+    $journalname = "${name}1"
+    $partfact = "${devname}2"
+    $partname = "${name}2"
   }
 
   exec { "mktable_gpt_${devname}":
@@ -39,11 +42,18 @@ define ceph::osd::device (
     require   => Package['parted']
   }
 
-  exec { "mkpart_${devname}":
-    command   => "parted -a optimal -s ${name} mkpart ceph 0% 100%",
-    unless    => "parted ${name} print | egrep '^ 1.*ceph$'",
+  exec { "mkpart_${devname}_journal":
+    command   => "parted -a optimal -s ${name} mkpart journal 0% ${journal_size_mb}",
+    unless    => "parted ${name} print | egrep '^ 1.*journal$'",
     logoutput => true,
     require   => [Package['parted'], Exec["mktable_gpt_${devname}"]]
+  }
+
+  exec { "mkpart_${devname}":
+    command   => "parted -a optimal -s ${name} mkpart ceph ${journal_size_mb} 100%",
+    unless    => "parted ${name} print | egrep '^ 2.*ceph$'",
+    logoutput => true,
+    require   => [Package['parted'], Exec["mkpart_${devname}_journal"]]
   }
 
   exec { "mkfs_${devname}":
@@ -73,6 +83,7 @@ size=1024m -n size=64k ${partname}",
         device       => $partname,
         cluster_addr => $::ceph::osd::cluster_address,
         public_addr  => $::ceph::osd::public_address,
+        osd_journal  => $journalname,
       }
 
       $osd_data = regsubst($::ceph::conf::osd_data, '\$id', $osd_id)

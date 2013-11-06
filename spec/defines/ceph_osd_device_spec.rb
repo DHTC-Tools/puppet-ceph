@@ -35,16 +35,23 @@ class { 'ceph::osd':
       'require'   => 'Package[parted]'
     ) }
 
-    it { should contain_exec('mkpart_device').with(
-      'command'   => 'parted -a optimal -s /dev/device mkpart ceph 0% 100%',
-      'unless'    => "parted /dev/device print | egrep '^ 1.*ceph$'",
+    it { should contain_exec('mkpart_device_journal').with(
+      'command'   => 'parted -a optimal -s /dev/device mkpart journal 0% 10240',
+      'unless'    => "parted /dev/device print | egrep '^ 1.*journal$'",
       'logoutput' => 'true',
       'require'   => ['Package[parted]', 'Exec[mktable_gpt_device]']
     ) }
 
+    it { should contain_exec('mkpart_device').with(
+      'command'   => 'parted -a optimal -s /dev/device mkpart ceph 10240 100%',
+      'unless'    => "parted /dev/device print | egrep '^ 2.*ceph$'",
+      'logoutput' => 'true',
+      'require'   => ['Package[parted]', 'Exec[mkpart_device_journal]']
+    ) }
+
     it { should contain_exec('mkfs_device').with(
-      'command'   => 'sleep 5 && mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device1',
-      'unless'    => 'xfs_admin -l /dev/device1',
+      'command'   => 'sleep 5 && mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/device2',
+      'unless'    => 'xfs_admin -l /dev/device2',
       'logoutput' => 'true',
       'require'   => ['Package[xfsprogs]', 'Exec[mkpart_device]']
     ) }
@@ -66,7 +73,7 @@ ceph::key { 'admin':
     let :facts do
       {
         :concat_basedir     => '/var/lib/puppet/lib/concat',
-        :blkid_uuid_device1 => 'dummy-uuid-1234',
+        :blkid_uuid_device2 => 'dummy-uuid-1234',
         :hostname           => 'dummy-host'
       }
     end
@@ -81,16 +88,17 @@ ceph::key { 'admin':
       let :facts do
         {
           :concat_basedir      => '/var/lib/puppet/lib/concat',
-          :blkid_uuid_device1  => 'dummy-uuid-1234',
-          :ceph_osd_id_device1 => '56',
+          :blkid_uuid_device2  => 'dummy-uuid-1234',
+          :ceph_osd_id_device2 => '56',
           :hostname            => 'dummy-host',
         }
       end
 
       it { should contain_ceph__conf__osd('56').with(
-        'device'       => '/dev/device1',
+        'device'       => '/dev/device2',
         'public_addr'  => '10.1.0.156',
-        'cluster_addr' => '10.0.0.56'
+        'cluster_addr' => '10.0.0.56',
+        'osd_journal'  => '/dev/device1'
       ) }
 
       it { should contain_file('/var/lib/ceph/osd/osd.56').with(
@@ -99,7 +107,7 @@ ceph::key { 'admin':
 
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
         'ensure'  => 'present',
-        'device'  => '/dev/device1',
+        'device'  => '/dev/device2',
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64,noauto',
         'pass'    => 0,
@@ -160,15 +168,21 @@ class { 'ceph::osd':
       'require' => 'Package[parted]'
     ) }
 
-    it { should contain_exec('mkpart_pci-0000:02:00.0-sas-0x500015554964d213-lun-0').with(
-      'command' => 'parted -a optimal -s /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 mkpart ceph 0% 100%',
-      'unless'  => "parted /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 print | egrep '^ 1.*ceph$'",
+    it { should contain_exec('mkpart_pci-0000:02:00.0-sas-0x500015554964d213-lun-0_journal').with(
+      'command' => 'parted -a optimal -s /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 mkpart journal 0% 10240',
+      'unless'  => "parted /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 print | egrep '^ 1.*journal$'",
       'require' => ['Package[parted]', 'Exec[mktable_gpt_pci-0000:02:00.0-sas-0x500015554964d213-lun-0]']
     ) }
 
+    it { should contain_exec('mkpart_pci-0000:02:00.0-sas-0x500015554964d213-lun-0').with(
+      'command' => 'parted -a optimal -s /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 mkpart ceph 10240 100%',
+      'unless'  => "parted /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0 print | egrep '^ 2.*ceph$'",
+      'require' => ['Package[parted]', 'Exec[mkpart_pci-0000:02:00.0-sas-0x500015554964d213-lun-0_journal]']
+    ) }
+
     it { should contain_exec('mkfs_pci-0000:02:00.0-sas-0x500015554964d213-lun-0').with(
-      'command' => 'sleep 5 && mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
-      'unless'  => 'xfs_admin -l /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
+      'command' => 'sleep 5 && mkfs.xfs -f -d agcount=8 -l size=1024m -n size=64k /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2',
+      'unless'  => 'xfs_admin -l /dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2',
       'require' => ['Package[xfsprogs]', 'Exec[mkpart_pci-0000:02:00.0-sas-0x500015554964d213-lun-0]']
     ) }
 
@@ -189,7 +203,7 @@ ceph::key { 'admin':
     let :facts do
       {
         :concat_basedir     => '/var/lib/puppet/lib/concat',
-        :'blkid_uuid_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1' => 'dummy-uuid-1234',
+        :'blkid_uuid_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2' => 'dummy-uuid-1234',
         :hostname           => 'dummy-host'
       }
     end
@@ -204,16 +218,17 @@ ceph::key { 'admin':
       let :facts do
         {
           :concat_basedir      => '/var/lib/puppet/lib/concat',
-          :'blkid_uuid_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1'  => 'dummy-uuid-1234',
-          :'ceph_osd_id_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1' => '56',
+          :'blkid_uuid_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2'  => 'dummy-uuid-1234',
+          :'ceph_osd_id_disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2' => '56',
           :hostname            => 'dummy-host',
         }
       end
 
       it { should contain_ceph__conf__osd('56').with(
-        'device'       => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
+        'device'       => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2',
         'public_addr'  => '10.1.0.156',
-        'cluster_addr' => '10.0.0.56'
+        'cluster_addr' => '10.0.0.56',
+        'osd_journal'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
       ) }
 
       it { should contain_file('/var/lib/ceph/osd/osd.56').with(
@@ -222,7 +237,7 @@ ceph::key { 'admin':
 
       it { should contain_mount('/var/lib/ceph/osd/osd.56').with(
         'ensure'  => 'present',
-        'device'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part1',
+        'device'  => '/dev/disk/by-path/pci-0000:02:00.0-sas-0x500015554964d213-lun-0-part2',
         'fstype'  => 'xfs',
         'options' => 'rw,noatime,inode64,noauto',
         'pass'    => 0,

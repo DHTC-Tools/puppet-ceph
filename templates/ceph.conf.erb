@@ -18,14 +18,12 @@
 <% end -%>
 
 [osd]
-  osd journal size = <%= @journal_size_mb %>
 <% if @cluster_network && @public_network -%>
   cluster network = <%= @cluster_network %>
   public network = <%= @public_network %>
 <% end -%>
   filestore flusher = false
   osd data = <%= @osd_data %>
-  osd journal = <%= @osd_journal_real %>
   osd mkfs type = xfs
   keyring = <%= @osd_data %>/keyring
 <% if @osd_crush_location -%>
